@@ -1,0 +1,39 @@
+services:
+  DEFAULTSERVICES:
+    - WSI
+    - PBI
+    - HDS
+    - DAS
+  SERVICESTORESTART: #list services to restart by service owner, service name, i.e. service owner:service name. THIS IS CASE SENSITIVE. 
+    - splunk:splunk #splunk
+    - ntp:ntpd #ntpd
+  WSI:
+    - /
+        /var/log
+    - /app
+        /app/logs/tomcat
+    - /logs
+        /var/log
+        /var/log1
+    - extensions
+        .gz
+        .log
+        .zip
+  PBI:
+    - /
+        /var/log/audit
+    - /app
+        /app/logs/mule
+        /app/logs/tomcat
+  HDS:
+    - /
+        /var/log/audit
+    - /app
+        /app/logs/tomcat
+  DAS:
+    - /ccis
+        /ccis/wi_log_archive/
+        /ccis/service/
+    - /app
+        /app/logs/mule
+        /app/logs/tomcat

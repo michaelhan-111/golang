@@ -1,0 +1,17 @@
+jks:
+  DEFAULTSERVICES:
+    - PBI
+    - HDS
+    - DAS
+    - NGWI
+    - WSI
+  PBI:
+    - /app/resources
+  HDS:
+    - /app/resources
+  DAS:
+    - /app/resources
+  NGWI:
+    - /app/resources
+  WSI:
+    - /Automations/utilities/jks_checker/local_testing

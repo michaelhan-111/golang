@@ -1,0 +1,29 @@
+jks:
+  DEFAULTSERVICES:
+    - DAS
+    - DAC
+    - WSI
+    - PPS
+    - CRED
+    - PMP
+  NODENAMEBYDEFAULTIHPSERVICES:
+    - DAS:fdsas
+    - PBI|HDS:pbias
+  NODENAMEBYDEFAULTAWSSERVICES:
+    - HDS
+  PBI:
+    - /app/resources
+  HDS:
+    - /app/resources
+  DAS:
+    - /app/resources
+  DAC:
+    - /app/resources
+  WSI:
+    - /app/resources
+  PMP:
+    - /app/resources
+  PPS:
+    - /usr/local/tomcat/conf
+  CRED:
+    - /usr/local/tomcat/conf
