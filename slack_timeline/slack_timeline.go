@@ -73,7 +73,7 @@ func main() {
 	var yamlOutput YamlConf
 	yamlOutput.readFromYaml()
 
-	//Example: url := "https://slack.com/api/channels.history?token=[token]&channel=CKK8J6JAY&pretty=1clear"
+	//Example: url := "https://slack.com/api/channels.history?token=[token]&channel=[channel id]&pretty=1clear"
 	message_url := "https://slack.com/api/channels.history?token=" + yamlOutput.Slack_auth_token + "&channel=" + yamlOutput.Slack_channel_id + "&pretty=1clear"
 	req, err := http.NewRequest("GET", message_url, nil)
 	if err != nil {
