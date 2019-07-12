@@ -112,15 +112,18 @@ func main() {
 			user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + json_obj.Messages[i].User + "&pretty=1"
 			req_profile, err := http.NewRequest("GET", user_info_url, nil)
 			if err != nil {
+				fmt.Println("GET call failed, quitting")
 				log.Fatal(err)
 			}
 			req_profile.Header.Add("Content-Type", "application/json")
 			res_profile, err := http.DefaultClient.Do(req_profile)
 			if err != nil {
+				fmt.Println("Failed adding headers, quitting")
 				log.Fatal(err)
 			}
 			body_profile, err := ioutil.ReadAll(res_profile.Body)
 			if err != nil {
+				fmt.Println("Failed to read JSON output before unmarshalling, quitting")
 				log.Fatal(err)
 			}
 			defer res_profile.Body.Close()
@@ -129,7 +132,8 @@ func main() {
 			json_profile_obj := SlackJSONProfileResponse{}
 			err = json.Unmarshal(json_profile_output, &json_profile_obj)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Failed to unmarshal the output, quitting")
+				log.Fatal(err)
 			}
 			/* If the message text contains an "@" and 9 alphanumeric characters. Use that to search Slack for the user's profile
 			   1. find message that contains "@"
@@ -146,7 +150,7 @@ func main() {
 				find_slack_user_id := display_name_expression.FindString(json_obj.Messages[i].Text)
 				slack_user_id_without_symbol := strings.Replace(find_slack_user_id, "@", "", -1)
 				slack_user_id := retrieveSlackProfile(slack_user_id_without_symbol)
-				//retrieveSlackProfile(y)
+				//retrieveSlackProfile(slack_user_id_without_symbol)
 				updated_message_text := strings.Replace(json_obj.Messages[i].Text, slack_user_id_without_symbol, slack_user_id, -1)
 				//fmt.Println("find_slack_user_id:", find_slack_user_id)
 				//fmt.Println("drop_symbol:", drop_symbol)
@@ -186,15 +190,18 @@ func retrieveSlackProfile(slackID string) string {
 	user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + slackID + "&pretty=1"
 	req_profile, err := http.NewRequest("GET", user_info_url, nil)
 	if err != nil {
+		fmt.Println("GET call failed, quitting")
 		log.Fatal(err)
 	}
 	req_profile.Header.Add("Content-Type", "application/json")
 	res_profile, err := http.DefaultClient.Do(req_profile)
 	if err != nil {
+		fmt.Println("Failed adding headers, quitting")
 		log.Fatal(err)
 	}
 	body_profile, err := ioutil.ReadAll(res_profile.Body)
 	if err != nil {
+		fmt.Println("Failed to read JSON output before unmarshalling, quitting")
 		log.Fatal(err)
 	}
 	defer res_profile.Body.Close()
@@ -203,7 +210,8 @@ func retrieveSlackProfile(slackID string) string {
 	json_profile_obj := SlackJSONProfileResponse{}
 	err = json.Unmarshal(json_profile_output, &json_profile_obj)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Failed to unmarshal the output, quitting")
+		log.Fatal(err)
 	}
 	/* 1. create an empty map above
 	   2. when pulling the values, add them to the map if not there already. key value pairs: Slack ID:Real Name
