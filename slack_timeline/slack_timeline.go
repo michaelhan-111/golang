@@ -144,10 +144,10 @@ func main() {
 			expression_match_check := display_name_expression.MatchString(json_obj.Messages[i].Text)
 			if expression_match_check {
 				find_slack_user_id := display_name_expression.FindString(json_obj.Messages[i].Text)
-				drop_symbol := strings.Replace(find_slack_user_id, "@", "", -1)
-				slack_user_id := retrieveSlackProfile(drop_symbol)
+				slack_user_id_without_symbol := strings.Replace(find_slack_user_id, "@", "", -1)
+				slack_user_id := retrieveSlackProfile(slack_user_id_without_symbol)
 				//retrieveSlackProfile(y)
-				updated_message_text := strings.Replace(json_obj.Messages[i].Text, drop_symbol, slack_user_id, -1)
+				updated_message_text := strings.Replace(json_obj.Messages[i].Text, slack_user_id_without_symbol, slack_user_id, -1)
 				//fmt.Println("find_slack_user_id:", find_slack_user_id)
 				//fmt.Println("drop_symbol:", drop_symbol)
 				//fmt.Println("slack_user_id:", slack_user_id)
