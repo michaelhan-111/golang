@@ -69,11 +69,11 @@ var message_text string = "message"
 var slackUserInfo = map[string]string{}
 
 func main() {
-	// read output from yaml instead of hard coding the slack auth token and channel room inside the script/program
+	/* read output from yaml instead of hard coding the slack auth token and channel room inside the script/program */
 	var yamlOutput YamlConf
 	yamlOutput.readFromYaml()
 
-	//Example: url := "https://slack.com/api/channels.history?token=[token]&channel=[channel id]&pretty=1clear"
+	/* Example: url := "https://slack.com/api/channels.history?token=xoxp-267900653829-665768827328-663931256177-17b3511420c8ef1e1380b1144968a948&channel=CKK8J6JAY&pretty=1clear" */
 	message_url := "https://slack.com/api/channels.history?token=" + yamlOutput.Slack_auth_token + "&channel=" + yamlOutput.Slack_channel_id + "&pretty=1clear"
 	req, err := http.NewRequest("GET", message_url, nil)
 	if err != nil {
@@ -91,7 +91,7 @@ func main() {
 	defer res.Body.Close()
 	//fmt.Println(string(body))
 
-	// Unmarshal the JSON output from Slack and then parse it
+	/* Unmarshal the JSON output from Slack and then parse it */
 	json_output := []byte(body)
 	json_obj := SlackJSONMessageResponse{}
 	err = json.Unmarshal(json_output, &json_obj)
@@ -101,8 +101,8 @@ func main() {
 	json_length := len(json_obj.Messages)
 	//	fmt.Println("Length of json:", json_length)
 	for i := 0; i < json_length; i++ {
-		// pull back only message types; not sure if there are other types when pulling back the messages data from Slack
-		// epoch time conversion: string --> float64 --> int64 --> date; time package can't handle float64
+		/* pull back only message types; not sure if there are other types when pulling back the messages data from Slack
+		   epoch time conversion: string --> float64 --> int64 --> date; time package can't handle float64 */
 		if json_obj.Messages[i].Slacktype == message_text {
 			x, err := strconv.ParseFloat(json_obj.Messages[i].Ts, 64)
 			if err != nil {
@@ -132,27 +132,34 @@ func main() {
 				fmt.Println(err)
 			}
 			//text := json_obj.Messages[i].Text
-			// If the message text contains an "@", 9 alphanumeric characters. Use that to search Slack for the user's profile
-			// 1. find message that contains "@"
-			// 2. within the message, pull out the text that starts with @[A-Z] and ends with a space
-			// 3. take the text and use Slack's API to see if you can pull back a profile to get the user's real name
-			// 4. replace the display name with the real name in the message
-			// 5. print the updated message
+			/* If the message text contains an "@", 9 alphanumeric characters. Use that to search Slack for the user's profile
+			   1. find message that contains "@"
+			   2. within the message, pull out the text that starts with @[A-Z] and ends with a space
+			   3. take the text and use Slack's API to see if you can pull back a profile to get the user's real name
+			   4. replace the display name with the real name in the message
+			   5. print the updated message */
 			if strings.Contains(json_obj.Messages[i].Text, "@") {
 				//fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
 				//fmt.Println("This message contains an @")
-				// This assumes the Slack User ID is a mix of capital letters and numbers, 9 in length
-				// Pulling back the display name includes the @ --> strip the @ --> use this value to lookup the profile
+				/* This assumes the Slack User ID is a mix of capital letters and numbers, 9 in length
+				   Pulling back the display name includes the @ --> strip the @ --> use this value to lookup the profile */
 				display_name_expression := regexp.MustCompile("@([A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9])")
-				x := display_name_expression.FindString(json_obj.Messages[i].Text)
-				y := strings.Replace(x, "@", "", -1)
-				z := retrieveSlackProfile(y)
-				//retrieveSlackProfile(y)
-				updated_message_text := strings.Replace(json_obj.Messages[i].Text, y, z, -1)
-				//fmt.Println("x:", x)
-				//fmt.Println("y:", y)
-				//fmt.Println("z:", z)
-				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
+				//x := display_name_expression.FindString(json_obj.Messages[i].Text)
+				/* Need to add a check for messages that contain an @ symbol but is not a Slack ID */
+				x := display_name_expression.MatchString(json_obj.Messages[i].Text)
+				if x {
+					find_string := display_name_expression.FindString(json_obj.Messages[i].Text)
+					y := strings.Replace(find_string, "@", "", -1)
+					z := retrieveSlackProfile(y)
+					//retrieveSlackProfile(y)
+					updated_message_text := strings.Replace(json_obj.Messages[i].Text, y, z, -1)
+					//fmt.Println("x:", x)
+					//fmt.Println("y:", y)
+					//fmt.Println("z:", z)
+					fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
+				} else {
+					fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_obj.Messages[i].Text, ":", json_profile_obj.Profile.RealName)
+				}
 			} else {
 				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_obj.Messages[i].Text, ":", json_profile_obj.Profile.RealName)
 			}
