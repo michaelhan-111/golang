@@ -131,9 +131,9 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			/* If the message text contains an "@", 9 alphanumeric characters. Use that to search Slack for the user's profile
+			/* If the message text contains an "@" and 9 alphanumeric characters. Use that to search Slack for the user's profile
 			   1. find message that contains "@"
-			   2. within the message, pull out the text that starts with @[A-Z] and ends with a space
+			   2. within the message, pull out the text that contains @[A-Z]
 			   3. take the text and use Slack's API to see if you can pull back a profile to get the user's real name
 			   4. replace the display name with the real name in the message
 			   5. print the updated message
