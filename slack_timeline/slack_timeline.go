@@ -14,9 +14,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-/////	Declare variables here 	////////
+/*	Declare variables here 	*/
 
-//create JSON struct to deal with Slack JSON
+/* create JSON struct to deal with Slack JSON */
 type SlackJSONMessage struct {
 	Clientmsgid string `json:"client_msg_id"`
 	Slacktype   string `json:"type"`
@@ -26,7 +26,7 @@ type SlackJSONMessage struct {
 	Purpose     string `json:"purpose"`
 }
 
-//create pointer to the array of Slack JSON objects
+/* create pointer to the array of Slack JSON objects */
 type SlackJSONMessageResponse struct {
 	Messages []SlackJSONMessage `json:"messages"`
 }
@@ -131,35 +131,27 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			//text := json_obj.Messages[i].Text
 			/* If the message text contains an "@", 9 alphanumeric characters. Use that to search Slack for the user's profile
 			   1. find message that contains "@"
 			   2. within the message, pull out the text that starts with @[A-Z] and ends with a space
 			   3. take the text and use Slack's API to see if you can pull back a profile to get the user's real name
 			   4. replace the display name with the real name in the message
-			   5. print the updated message */
-			if strings.Contains(json_obj.Messages[i].Text, "@") {
-				//fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
-				//fmt.Println("This message contains an @")
-				/* This assumes the Slack User ID is a mix of capital letters and numbers, 9 in length
-				   Pulling back the display name includes the @ --> strip the @ --> use this value to lookup the profile */
-				display_name_expression := regexp.MustCompile("@([A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9])")
-				//x := display_name_expression.FindString(json_obj.Messages[i].Text)
-				/* Need to add a check for messages that contain an @ symbol but is not a Slack ID */
-				x := display_name_expression.MatchString(json_obj.Messages[i].Text)
-				if x {
-					find_string := display_name_expression.FindString(json_obj.Messages[i].Text)
-					y := strings.Replace(find_string, "@", "", -1)
-					z := retrieveSlackProfile(y)
-					//retrieveSlackProfile(y)
-					updated_message_text := strings.Replace(json_obj.Messages[i].Text, y, z, -1)
-					//fmt.Println("x:", x)
-					//fmt.Println("y:", y)
-					//fmt.Println("z:", z)
-					fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
-				} else {
-					fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_obj.Messages[i].Text, ":", json_profile_obj.Profile.RealName)
-				}
+			   5. print the updated message
+			   This assumes the Slack User ID is a mix of capital letters and numbers, 9 in length
+			   Pulling back the display name includes the @ --> strip the @ --> use this value to lookup the profile */
+			display_name_expression := regexp.MustCompile("@([A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9])")
+			/* Need to add a check for messages that contain an @ symbol but is not a Slack ID */
+			expression_match_check := display_name_expression.MatchString(json_obj.Messages[i].Text)
+			if expression_match_check {
+				find_slack_user_id := display_name_expression.FindString(json_obj.Messages[i].Text)
+				drop_symbol := strings.Replace(find_slack_user_id, "@", "", -1)
+				slack_user_id := retrieveSlackProfile(drop_symbol)
+				//retrieveSlackProfile(y)
+				updated_message_text := strings.Replace(json_obj.Messages[i].Text, drop_symbol, slack_user_id, -1)
+				//fmt.Println("find_slack_user_id:", find_slack_user_id)
+				//fmt.Println("drop_symbol:", drop_symbol)
+				//fmt.Println("slack_user_id:", slack_user_id)
+				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
 			} else {
 				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_obj.Messages[i].Text, ":", json_profile_obj.Profile.RealName)
 			}
@@ -188,10 +180,10 @@ func (yamlInput *YamlConf) readFromYaml() {
 	}
 }
 
-func retrieveSlackProfile(y string) string {
+func retrieveSlackProfile(slackID string) string {
 	var yamlOutput YamlConf
 	yamlOutput.readFromYaml()
-	user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + y + "&pretty=1"
+	user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + slackID + "&pretty=1"
 	req_profile, err := http.NewRequest("GET", user_info_url, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -213,16 +205,16 @@ func retrieveSlackProfile(y string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// 1. create an empty map above
-	// 2. when pulling the values, add them to the map if not there already. key value pairs: Slack ID:Real Name
-	// 3. Each time, check the map to see if the key exists; if not, add. If the key does exist, pull back the Real Name from the map. This prevents unnecessary polling via the API.
-	_, exist := slackUserInfo[y]
+	/* 1. create an empty map above
+	   2. when pulling the values, add them to the map if not there already. key value pairs: Slack ID:Real Name
+	   3. Each time, check the map to see if the key exists; if not, add. If the key does exist, pull back the Real Name from the map. This prevents unnecessary polling via the API. */
+	_, exist := slackUserInfo[slackID]
 	if exist {
-		return slackUserInfo[y]
+		return slackUserInfo[slackID]
 		//fmt.Println(slackUserInfo)
 	} else {
-		slackUserInfo[y] = json_profile_obj.Profile.RealName
-		return slackUserInfo[y]
+		slackUserInfo[slackID] = json_profile_obj.Profile.RealName
+		return slackUserInfo[slackID]
 		//fmt.Println("Key does not exist")
 		//fmt.Println(slackUserInfo)
 	}
@@ -230,10 +222,10 @@ func retrieveSlackProfile(y string) string {
 	//return user_info_url
 }
 
-//URL to pull back user info:
-//https://slack.com/api/users.profile.get?token=xoxp-267900653829-665768827328-663931256177-17b3511420c8ef1e1380b1144968a948&user=W8FHWMLNP&pretty=1
-
 /* USE FOR LATER
+
+URL to pull back user info:
+https://slack.com/api/users.profile.get?token=xoxp-267900653829-665768827328-663931256177-17b3511420c8ef1e1380b1144968a948&user=W8FHWMLNP&pretty=1
 
 func translateSlackJSON(body []byte) (*SlackJSONResponse, error) {
 	var s = new(SlackJSONResponse)
