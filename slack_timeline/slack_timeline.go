@@ -185,34 +185,6 @@ func (yamlInput *YamlConf) readFromYaml() {
 }
 
 func retrieveSlackProfile(slackID string) string {
-	var yamlOutput YamlConf
-	yamlOutput.readFromYaml()
-	user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + slackID + "&pretty=1"
-	req_profile, err := http.NewRequest("GET", user_info_url, nil)
-	if err != nil {
-		fmt.Println("GET call failed, quitting")
-		log.Fatal(err)
-	}
-	req_profile.Header.Add("Content-Type", "application/json")
-	res_profile, err := http.DefaultClient.Do(req_profile)
-	if err != nil {
-		fmt.Println("Failed adding headers, quitting")
-		log.Fatal(err)
-	}
-	body_profile, err := ioutil.ReadAll(res_profile.Body)
-	if err != nil {
-		fmt.Println("Failed to read JSON output before unmarshalling, quitting")
-		log.Fatal(err)
-	}
-	defer res_profile.Body.Close()
-
-	json_profile_output := []byte(body_profile)
-	json_profile_obj := SlackJSONProfileResponse{}
-	err = json.Unmarshal(json_profile_output, &json_profile_obj)
-	if err != nil {
-		fmt.Println("Failed to unmarshal the output, quitting")
-		log.Fatal(err)
-	}
 	/* 1. create an empty map above
 	   2. when pulling the values, add them to the map if not there already. key value pairs: Slack ID:Real Name
 	   3. Each time, check the map to see if the key exists; if not, add. If the key does exist, pull back the Real Name from the map. This prevents unnecessary polling via the API. */
@@ -221,13 +193,37 @@ func retrieveSlackProfile(slackID string) string {
 		return slackUserInfo[slackID]
 		//fmt.Println(slackUserInfo)
 	} else {
+		var yamlOutput YamlConf
+		yamlOutput.readFromYaml()
+		user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + slackID + "&pretty=1"
+		req_profile, err := http.NewRequest("GET", user_info_url, nil)
+		if err != nil {
+			fmt.Println("GET call failed, quitting")
+			log.Fatal(err)
+		}
+		req_profile.Header.Add("Content-Type", "application/json")
+		res_profile, err := http.DefaultClient.Do(req_profile)
+		if err != nil {
+			fmt.Println("Failed adding headers, quitting")
+			log.Fatal(err)
+		}
+		body_profile, err := ioutil.ReadAll(res_profile.Body)
+		if err != nil {
+			fmt.Println("Failed to read JSON output before unmarshalling, quitting")
+			log.Fatal(err)
+		}
+		defer res_profile.Body.Close()
+
+		json_profile_output := []byte(body_profile)
+		json_profile_obj := SlackJSONProfileResponse{}
+		err = json.Unmarshal(json_profile_output, &json_profile_obj)
+		if err != nil {
+			fmt.Println("Failed to unmarshal the output, quitting")
+			log.Fatal(err)
+		}
 		slackUserInfo[slackID] = json_profile_obj.Profile.RealName
 		return slackUserInfo[slackID]
-		//fmt.Println("Key does not exist")
-		//fmt.Println(slackUserInfo)
 	}
-	// return json_profile_obj.Profile.RealName
-	//return user_info_url
 }
 
 /* USE FOR LATER
