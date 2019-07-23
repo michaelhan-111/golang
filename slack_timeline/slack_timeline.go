@@ -32,28 +32,28 @@ type SlackJSONMessageResponse struct {
 }
 
 type SlackJSONProfile struct {
-	Title                 string `json:"title"`
-	Phone                 string `json:"phone"`
-	Skype                 string `json:"skype"`
-	RealName              string `json:"real_name"`
-	RealNameNormalized    string `json:"real_name_normalized"`
-	DisplayName           string `json:"display_name"`
-	DisplayNameNormalized string `json:"display_name_normalized"`
-	Fields                string `json:"fields"`
-	StatusText            string `json:"status_text"`
-	StatusEmoji           string `json:"status_emoji"`
-	StatusExpiration      int    `json:"status_expiration"`
-	AvatarHash            string `json:"avatar_hash"`
-	Email                 string `json:"email"`
-	FirstName             string `json:"first_name"`
-	LastName              string `json:"last_name"`
-	Image24               string `json:"image_24"`
-	Image32               string `json:"image_32"`
-	Image48               string `json:"image_48"`
-	Image72               string `json:"image_72"`
-	Image192              string `json:"image_192"`
-	Image512              string `json:"image_512"`
-	StatusTextCanonical   string `json:"status_text_canonical"`
+	Title                 string      `json:"title"`
+	Phone                 string      `json:"phone"`
+	Skype                 string      `json:"skype"`
+	RealName              string      `json:"real_name"`
+	RealNameNormalized    string      `json:"real_name_normalized"`
+	DisplayName           string      `json:"display_name"`
+	DisplayNameNormalized string      `json:"display_name_normalized"`
+	Fields                interface{} `json:"fields"`
+	StatusText            string      `json:"status_text"`
+	StatusEmoji           string      `json:"status_emoji"`
+	StatusExpiration      int         `json:"status_expiration"`
+	AvatarHash            string      `json:"avatar_hash"`
+	Email                 string      `json:"email"`
+	FirstName             string      `json:"first_name"`
+	LastName              string      `json:"last_name"`
+	Image24               string      `json:"image_24"`
+	Image32               string      `json:"image_32"`
+	Image48               string      `json:"image_48"`
+	Image72               string      `json:"image_72"`
+	Image192              string      `json:"image_192"`
+	Image512              string      `json:"image_512"`
+	StatusTextCanonical   string      `json:"status_text_canonical"`
 }
 
 type SlackJSONProfileResponse struct {
@@ -129,6 +129,7 @@ func main() {
 			defer res_profile.Body.Close()
 
 			json_profile_output := []byte(body_profile)
+			//			fmt.Println(string(json_profile_output))
 			json_profile_obj := SlackJSONProfileResponse{}
 			err = json.Unmarshal(json_profile_output, &json_profile_obj)
 			if err != nil {
@@ -143,9 +144,12 @@ func main() {
 			   5. print the updated message
 			   This assumes the Slack User ID is a mix of capital letters and numbers, 9 in length
 			   Pulling back the display name includes the @ --> strip the @ --> use this value to lookup the profile */
-			display_name_expression := regexp.MustCompile("@([A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9])")
+			//display_name_expression := regexp.MustCompile(`@([A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9])`)
+			display_name_expression := regexp.MustCompile("@[A-Z0-9]{9}")
+			//display_name_expression_formatted := regexp.MustCompile(`@[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]`)
 			/* Need to add a check for messages that contain an @ symbol but is not a Slack ID */
 			expression_match_check := display_name_expression.MatchString(json_obj.Messages[i].Text)
+			//expression_match_check_formatted := display_name_expression_formatted.MatchString(json_obj.Messages[i].Text)
 			if expression_match_check {
 				find_slack_user_id := display_name_expression.FindString(json_obj.Messages[i].Text)
 				slack_user_id_without_symbol := strings.Replace(find_slack_user_id, "@", "", -1)
@@ -155,9 +159,9 @@ func main() {
 				//fmt.Println("find_slack_user_id:", find_slack_user_id)
 				//fmt.Println("drop_symbol:", drop_symbol)
 				//fmt.Println("slack_user_id:", slack_user_id)
-				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
+				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_profile_obj.Profile.RealName, ":", updated_message_text)
 			} else {
-				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_obj.Messages[i].Text, ":", json_profile_obj.Profile.RealName)
+				fmt.Println((time.Unix(nonfloatepoch, 0)), ":", json_profile_obj.Profile.RealName, ":", json_obj.Messages[i].Text)
 			}
 			//fmt.Println((time.Unix(nonfloatepoch, 0)), ":", updated_message_text, ":", json_profile_obj.Profile.RealName)
 			//fmt.Println(json_profile_obj.Profile.Realname)
@@ -197,6 +201,7 @@ func retrieveSlackProfile(slackID string) string {
 		yamlOutput.readFromYaml()
 		user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + slackID + "&pretty=1"
 		req_profile, err := http.NewRequest("GET", user_info_url, nil)
+		fmt.Println(req_profile)
 		if err != nil {
 			fmt.Println("GET call failed, quitting")
 			log.Fatal(err)
@@ -220,6 +225,7 @@ func retrieveSlackProfile(slackID string) string {
 		if err != nil {
 			fmt.Println("Failed to unmarshal the output, quitting")
 			log.Fatal(err)
+			//fmt.Println(err)
 		}
 		slackUserInfo[slackID] = json_profile_obj.Profile.RealName
 		return slackUserInfo[slackID]
