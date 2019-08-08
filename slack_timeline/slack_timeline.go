@@ -65,8 +65,9 @@ type YamlConf struct {
 	Slack_channel_id string `yaml:"slack_channel_id"`
 }
 
-var message_text string = "message"
+var messageText string = "message"
 var slackUserInfo = map[string]string{}
+var configFile = "slack.yaml"
 
 func main() {
 	/* read output from yaml instead of hard coding the slack auth token and channel room inside the script/program */
@@ -103,7 +104,7 @@ func main() {
 	for i := 0; i < json_length; i++ {
 		/* pull back only message types; not sure if there are other types when pulling back the messages data from Slack
 		   epoch time conversion: string --> float64 --> int64 --> date; time package can't handle float64 */
-		if json_obj.Messages[i].Slacktype == message_text {
+		if json_obj.Messages[i].Slacktype == messageText {
 			x, err := strconv.ParseFloat(json_obj.Messages[i].Ts, 64)
 			if err != nil {
 				fmt.Println(err)
@@ -178,7 +179,7 @@ func main() {
 }
 
 func (yamlInput *YamlConf) readFromYaml() {
-	yamlFile, err := ioutil.ReadFile("slack.yaml")
+	yamlFile, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		fmt.Println("Error reading yaml:", err)
 	}
