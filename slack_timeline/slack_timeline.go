@@ -201,7 +201,7 @@ func retrieveSlackProfile(slackID string) string {
 		yamlOutput.readFromYaml()
 		user_info_url := "https://slack.com/api/users.profile.get?token=" + yamlOutput.Slack_auth_token + "&user=" + slackID + "&pretty=1"
 		req_profile, err := http.NewRequest("GET", user_info_url, nil)
-		fmt.Println(req_profile)
+		//fmt.Println(req_profile)
 		if err != nil {
 			fmt.Println("GET call failed, quitting")
 			log.Fatal(err)
