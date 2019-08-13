@@ -18,12 +18,13 @@ import (
 
 /* create JSON struct to deal with Slack JSON */
 type SlackJSONMessage struct {
-	Clientmsgid string `json:"client_msg_id"`
-	Slacktype   string `json:"type"`
-	Text        string `json:"text"`
-	User        string `json:"user"`
-	Ts          string `json:"ts"`
-	Purpose     string `json:"purpose"`
+	Clientmsgid string                  `json:"client_msg_id"`
+	Slacktype   string                  `json:"type"`
+	Text        string                  `json:"text"`
+	User        string                  `json:"user"`
+	Ts          string                  `json:"ts"`
+	Purpose     string                  `json:"purpose"`
+	Files       []SlackJSONMessageFiles `json:"files"`
 }
 
 /* create pointer to the array of Slack JSON objects */
@@ -60,6 +61,43 @@ type SlackJSONProfileResponse struct {
 	Profile SlackJSONProfile `json:"profile"`
 }
 
+type SlackJSONMessageFiles struct {
+	Id                 string `json:"id"`
+	Created            int    `json:"created"`
+	Timestamp          int    `json:"timestamp"`
+	Name               string `json:"name"`
+	Title              string `json:"title"`
+	Mimetype           string `json:"mimetype"`
+	Filetype           string `json:"filetype"`
+	PrettyType         string `json:"pretty_type"`
+	User               string `json:"user"`
+	Editable           bool   `json:"editable"`
+	Size               int    `json:"size"`
+	Mode               string `json:"mode"`
+	IsExternal         bool   `json:"is_external"`
+	ExternalType       string `json:"external_type"`
+	IsPublic           bool   `json:"is_public"`
+	PublicUrlShared    bool   `json:"public_url_shared"`
+	DisplayAsBot       bool   `json:"display_as_bot"`
+	Username           string `json:"username"`
+	UrlPrivate         string `json:"url_private"`
+	UrlPrivateDownload string `json:"url_private_download"`
+	Permalink          string `json:"permalink"`
+	PermalinkPublic    string `json:"permalink_public"`
+	EditLink           string `json:"edit_link"`
+	Preview            string `json:"preview"`
+	PreviewHighlight   string `json:"preview_highlight"`
+	Lines              int    `json:"lines"`
+	Lines_More         int    `json:"lines_more"`
+	PreviewIsTruncated bool   `json:"preview_is_truncated"`
+	IsStarred          bool   `json:"is_starred"`
+	HasRichPreview     bool   `json:"has_rich_preview"`
+}
+
+//type SlackJSONMessageFilesResponse struct {
+//	Files SlackJSONMessageFiles `json:"files"`
+//}
+
 type YamlConf struct {
 	Slack_auth_token string `yaml:"slack_auth_token"`
 	Slack_channel_id string `yaml:"slack_channel_id"`
@@ -68,6 +106,7 @@ type YamlConf struct {
 var messageText string = "message"
 var slackUserInfo = map[string]string{}
 var configFile = "slack.yaml"
+var getPermalink []SlackJSONMessageFiles
 
 func main() {
 	/* read output from yaml instead of hard coding the slack auth token and channel room inside the script/program */
@@ -104,7 +143,7 @@ func main() {
 	for i := 0; i < json_length; i++ {
 		/* pull back only message types; not sure if there are other types when pulling back the messages data from Slack
 		   epoch time conversion: string --> float64 --> int64 --> date; time package can't handle float64 */
-		if json_obj.Messages[i].Slacktype == messageText {
+		if json_obj.Messages[i].Slacktype == messageText && json_obj.Messages[i].Text != "" {
 			x, err := strconv.ParseFloat(json_obj.Messages[i].Ts, 64)
 			if err != nil {
 				fmt.Println(err)
@@ -172,6 +211,9 @@ func main() {
 			//fmt.Println(time.Unix(nonfloatepoch, 0))
 			//fmt.Printf("%d\n", nonfloatepoch)
 			//fmt.Println("Message:", json_obj.Messages[i].Text, "Timestamp:", json_obj.Messages[i].Ts)
+		} else if json_obj.Messages[i].Slacktype == messageText && json_obj.Messages[i].Text == "" {
+			//fmt.Println("Came across a message without text, hopefully a code snippet or attachment")
+			fmt.Println("Code snippet or attachment: ", json_obj.Messages[i].Files[0].Permalink)
 		} else {
 			fmt.Println("Came across a slack type that wasn't a message:", json_obj.Messages[i].Slacktype)
 		}
