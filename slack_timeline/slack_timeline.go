@@ -106,7 +106,6 @@ type YamlConf struct {
 var messageText string = "message"
 var slackUserInfo = map[string]string{}
 var configFile = "slack.yaml"
-var getPermalink []SlackJSONMessageFiles
 
 func main() {
 	/* read output from yaml instead of hard coding the slack auth token and channel room inside the script/program */
@@ -213,7 +212,7 @@ func main() {
 			//fmt.Println("Message:", json_obj.Messages[i].Text, "Timestamp:", json_obj.Messages[i].Ts)
 		} else if json_obj.Messages[i].Slacktype == messageText && json_obj.Messages[i].Text == "" {
 			//fmt.Println("Came across a message without text, hopefully a code snippet or attachment")
-			fmt.Println("Code snippet or attachment: ", json_obj.Messages[i].Files[0].Permalink)
+			fmt.Println("Code snippet or attachment:", json_obj.Messages[i].Files[0].Permalink)
 		} else {
 			fmt.Println("Came across a slack type that wasn't a message:", json_obj.Messages[i].Slacktype)
 		}
