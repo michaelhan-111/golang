@@ -1,0 +1,10 @@
+# yaml shell for the script to work
+recipients:
+  fromEmail: 
+    - 
+  emailPW:
+    -
+  sre: 
+    -
+  incident: 
+    - 
