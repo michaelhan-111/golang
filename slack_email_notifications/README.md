@@ -16,6 +16,7 @@ Use/rules:
     - 2019/08/19 09:32:07 xxxx sent!
     - no default was set intentionally
     - the script/program will not fail if an invalid group name is supplied as the group
+- The binary included works on Mac OS and may work on linux distros; not sure about Windows (created using go build)
 
 Gotchas/Notes: 
 - Email is being sent via gmail mail servers; they're reliable so I decided to use them
