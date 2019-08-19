@@ -40,10 +40,10 @@ func main() {
 	//fmt.Println("Value:", config.Recipients["recipients"]["sre"])
 	//fmt.Println("Length is:", len(config.Recipients["recipients"]["sre"]))
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("What message did you want to post?")
+	fmt.Print("What message did you want to post? ")
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSuffix(text, "\n")
-	groupPtr := flag.String("group", "", "Need to define a group; i.e. -group=sre. Read the README for options.")
+	groupPtr := flag.String("group", "", "Need to define a group; i.e. -group=sre. Read the README for options and rules around usage.")
 	flag.Parse()
 	for i := 0; i < len(config.Recipients["recipients"][*groupPtr]); i++ {
 		//fmt.Println("This text:", text, "will be sent to the following recipients:", config.Recipients["recipients"][*groupPtr][i])
