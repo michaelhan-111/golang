@@ -59,7 +59,7 @@ func send(body string, emailRecipient string, fromEmailAddress string, emailPW s
 
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
-		"Subject: " + "Testing Notification tool" + "\n" +
+		"Subject: " + "Notification from tool" + "\n" +
 		body + "\n"
 
 	err := smtp.SendMail("smtp.gmail.com:587",
