@@ -14,6 +14,7 @@ Use/rules:
     - the slack room ID can be found by right clicking on the room ID (i.e. inc0912477, etc) and copying the link; the slack room ID
 is everything after the last '/' in the URL
 - This only works for public slack rooms; testing against private slack rooms has not been done yet 
+- This tool/script will pull back up to 1000 messages; if more is needed, code will need to be updated
 
 To execute: 
 1. Download the respective binary corresponding to the OS of the system where this tool will run
