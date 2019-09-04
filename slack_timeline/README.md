@@ -6,8 +6,8 @@ This script/program was created for the following reasons:
 - The script/program takes the activity in a slack room and creates a timeline from it, in chronological order based off when the message was entered
 
 Pre-Requisites: 
-- *Executing binary:* This assumes most people that use this program will be on a Windows (amd64)  or Mac (darwin, amd64); for any other OS, we'll need to create another binary
-- Executing Go script: Go will need to be installed before executing
+- **Executing binary:** This assumes most people that use this program will be on a Windows (amd64)  or Mac (darwin, amd64); for any other OS, we'll need to create another binary
+- **Executing Go script:** Go will need to be installed before executing
 
 Use/rules: 
 - The configuration file, slack.yaml, needs to be in the same directory as the binary and/or go code
